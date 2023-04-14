@@ -6,14 +6,14 @@ from .constants import SPECIAL_TOKENS, SPECIAL_ID
 from .saver import tokenizer_loader
 
 class NERDataset(torch.utils.data.Dataset):
-    def __init__(self, model=None, tokenizer=None, filename=None, reader=None):
-        assert model != None or tokenizer != None
-        if tokenizer == None:
-            tokenizer = tokenizer_loader(AutoTokenizer, model)
+    def __init__(self, tokenizer=None, reader=None):
+        assert tokenizer != None
+        if type(tokenizer) == str:
+            tokenizer = tokenizer_loader(AutoTokenizer, tokenizer)
 
-        assert filename != None or reader != None
-        if reader == None:
-            reader = CONLLReader(filename)
+        assert reader != None
+        if type(reader) == str:
+            reader = CONLLReader(reader)
 
         self.reader = reader
         self.max_size = self.reader.max_size + 2

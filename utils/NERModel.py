@@ -6,12 +6,12 @@ from .NERDataset import crf_mask
 from .saver import model_loader
 
 class NERModel(torch.nn.Module):
-    def __init__(self, num_labels, model_name=None, bert_model=None):
+    def __init__(self, num_labels, bert_model=None):
         super(NERModel, self).__init__()
 
-        assert model_name != None or bert_model != None
-        if bert_model == None:
-            bert_model = model_loader(BertModel, model_name)
+        assert bert_model != None
+        if type(bert_model) == str:
+            bert_model = model_loader(BertModel, bert_model)
 
         self.bert = bert_model
         self.dropout = torch.nn.Dropout(self.bert.config.hidden_dropout_prob)
