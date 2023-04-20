@@ -73,19 +73,15 @@ class BartPromptOperator(PromptOperator):
         negative_entity = self.__generate_negative_entity(sentence, label, golden_entity)
 
         for item, tag in golden_entity:
-            result.append(
-                sentence_str + 
-                self.POSITIVE_TEMPLATE.format(
-                    candidate_span=item,
-                    entity_type=self.LABEL_ENTITY[tag]
-                )
-            )
+            positive_format = self.POSITIVE_TEMPLATE.format(candidate_span=item, entity_type=self.LABEL_ENTITY[tag])
+            result.append(f"{sentence_str}\t{positive_format}")
 
         for item in negative_entity:
-            result.append(sentence_str + self.NEGATIVE_TEMPLATE.format(candidate_span=item))
+            negative_format = self.NEGATIVE_TEMPLATE.format(candidate_span=item)
+            result.append(f"{sentence_str}\t{negative_format}")
 
         return result
 
 if __name__ == "__main__":
     prompt_op = BartPromptOperator("./data/msra.min.dev")
-    prompt_op.dump("./test")
+    prompt_op.dump("./test.tsv")

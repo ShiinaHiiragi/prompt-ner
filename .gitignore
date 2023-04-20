@@ -1,10 +1,10 @@
 __pycache__
-
-/deprecated
 /pretrained
 
+/test
 /test.py
 /test.ipynb
-/test
+/test.csv
+/test.tsv
 
 /utils/thulac/models
