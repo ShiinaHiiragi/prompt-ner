@@ -2,6 +2,9 @@ __pycache__
 
 /.vscode
 /pretrained
+/outputs
+/runs
+/cache_dir
 
 /test
 /test.py
