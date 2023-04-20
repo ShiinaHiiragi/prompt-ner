@@ -83,5 +83,6 @@ class BartPromptOperator(PromptOperator):
         return result
 
 if __name__ == "__main__":
-    prompt_op = BartPromptOperator("./data/msra.min.dev")
-    prompt_op.dump("./test.tsv")
+    DATASET_NAME = "msra.min"
+    prompt_op = BartPromptOperator(f"./data/{DATASET_NAME}.dev")
+    prompt_op.dump(f"./prompts/{DATASET_NAME}.dev.tsv")
