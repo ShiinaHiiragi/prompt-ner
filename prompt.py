@@ -1,8 +1,8 @@
 import re
 from random import randint
-from utils.lib import han
-from utils.PromptOperator import PromptOperator
+from utils import han
 from utils.segment import cut
+from operators.PromptOperator import PromptOperator
 
 class BartPromptOperator(PromptOperator):
     POSITIVE_TEMPLATE = "“{candidate_span}”是一个{entity_type}实体"

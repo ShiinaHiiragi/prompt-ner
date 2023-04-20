@@ -2,8 +2,8 @@ import torch
 from transformers import BertModel
 from torchcrf import CRF
 
-from .NERDataset import crf_mask
-from .saver import model_loader
+from operators.NERDataset import crf_mask
+from utils.saver import model_loader
 
 class NERModel(torch.nn.Module):
     def __init__(self, num_labels, bert_model=None):

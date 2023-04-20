@@ -1,9 +1,9 @@
 import torch
 from transformers import AutoTokenizer
 
-from .CONLLReader import CONLLReader
-from .constants import SPECIAL_TOKENS, SPECIAL_ID
-from .saver import tokenizer_loader
+from operators.CONLLReader import CONLLReader
+from utils.constants import SPECIAL_TOKENS, SPECIAL_ID
+from utils.saver import tokenizer_loader
 
 class NERDataset(torch.utils.data.Dataset):
     def __init__(self, tokenizer=None, reader=None):

@@ -1,5 +1,5 @@
 import random
-from .CONLLReader import CONLLReader
+from operators.CONLLReader import CONLLReader
 
 class PromptOperator:
     def __init__(self, reader=None):
