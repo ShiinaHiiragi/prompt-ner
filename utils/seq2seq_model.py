@@ -99,7 +99,7 @@ logger = logging.getLogger(__name__)
 
 MODEL_CLASSES = {
     "auto": (AutoConfig, AutoModel, AutoTokenizer),
-    "bart": (BartConfig, BartForConditionalGeneration, BartTokenizerFast),
+    "bart": (BartConfig, BartForConditionalGeneration, BertTokenizerFast),
     "mbart": (MBartConfig, MBartForConditionalGeneration, MBartTokenizer),
     "bert": (BertConfig, BertModel, BertTokenizerFast),
     "camembert": (CamembertConfig, CamembertModel, CamembertTokenizerFast),
@@ -308,11 +308,10 @@ class Seq2SeqModel:
                 config_class, model_class, tokenizer_class = MODEL_CLASSES[encoder_type]
 
             if encoder_decoder_type in ["bart", "mbart", "marian"]:
-                self.model = model_class.from_pretrained(encoder_decoder_name)
+                from utils.saver import tokenizer_loader, model_loader
+                self.model = model_loader(model_class, encoder_decoder_name)
                 if encoder_decoder_type in ["bart", "mbart"]:
-                    self.encoder_tokenizer = tokenizer_class.from_pretrained(
-                        encoder_decoder_name
-                    )
+                    self.encoder_tokenizer = tokenizer_loader(tokenizer_class, encoder_decoder_name)
                 elif encoder_decoder_type == "marian":
                     if self.args.base_marian_model_name:
                         self.encoder_tokenizer = tokenizer_class.from_pretrained(
