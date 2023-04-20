@@ -25,8 +25,11 @@ def model_loader(model_loader, model_name):
     return __loader(model_loader, model_name, "model")
 
 if __name__ == "__main__":
-    from transformers import AutoTokenizer
-    from transformers import BertModel
+    from transformers import AutoTokenizer, BertModel
+    from transformers import BertTokenizer, BartForConditionalGeneration
 
-    tokenizer_saver(AutoTokenizer, "bert-base-chinese")
-    model_saver(BertModel, "bert-base-chinese")
+    tokenizer_loader(AutoTokenizer, "bert-base-chinese")
+    model_loader(BertModel, "bert-base-chinese")
+
+    tokenizer_loader(BertTokenizer, "fnlp/bart-base-chinese")
+    model_loader(BartForConditionalGeneration, "fnlp/bart-base-chinese")
