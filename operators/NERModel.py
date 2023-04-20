@@ -33,3 +33,6 @@ class NERModel(torch.nn.Module):
             return predict, crf_tags[crf_masks == 1], loss
 
         return predict
+
+    def save_pretrained(self, path):
+        self.bert.save_pretrained(path)
