@@ -2,12 +2,12 @@ import re
 from random import randint
 from utils import han
 from utils.segment import cut
+from utils.tester import LABEL_ENTITY
 from operators.PromptOperator import PromptOperator
 
 class BartPromptOperator(PromptOperator):
     POSITIVE_TEMPLATE = "“{candidate_span}”是一个{entity_type}实体"
     NEGATIVE_TEMPLATE = "“{candidate_span}”不是一个命名实体"
-    LABEL_ENTITY = { "LOC": "地点", "ORG": "组织", "PER": "人名", "GPE": "地缘政治实体" }
 
     COUNTER_MAX = 100
     NEGATIVE_LOWER_BOND = 2
@@ -73,7 +73,7 @@ class BartPromptOperator(PromptOperator):
         negative_entity = self.__generate_negative_entity(sentence, label, golden_entity)
 
         for item, tag in golden_entity:
-            positive_format = self.POSITIVE_TEMPLATE.format(candidate_span=item, entity_type=self.LABEL_ENTITY[tag])
+            positive_format = self.POSITIVE_TEMPLATE.format(candidate_span=item, entity_type=LABEL_ENTITY[tag])
             result.append(f"{sentence_str}\t{positive_format}")
 
         for item in negative_entity:
