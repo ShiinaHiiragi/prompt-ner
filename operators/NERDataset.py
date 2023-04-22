@@ -16,6 +16,8 @@ class NERDataset(torch.utils.data.Dataset):
             reader = CONLLReader(reader)
 
         self.reader = reader
+        self.tokenizer = tokenizer
+
         self.max_size = self.reader.max_size + 2
         self.length = reader.length
 
