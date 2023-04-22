@@ -2,7 +2,7 @@ import re
 from random import randint
 from utils import han
 from utils.segment import cut
-from utils.tester import LABEL_ENTITY
+from utils.constants import LABEL_ENTITY
 from operators.PromptOperator import PromptOperator
 
 class BartPromptOperator(PromptOperator):

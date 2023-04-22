@@ -4,3 +4,5 @@ PAD_TOKEN = 0
 
 SPECIAL_TOKENS = [CLS_TOKEN, SEP_TOKEN, PAD_TOKEN]
 SPECIAL_ID = -1
+
+LABEL_ENTITY = { "LOC": "地点", "ORG": "组织", "PER": "人名", "GPE": "地缘政治实体" }
