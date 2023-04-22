@@ -4,6 +4,7 @@ from torchcrf import CRF
 
 from operators.NERDataset import crf_mask
 from utils.saver import model_loader
+from utils.constants import DEVICE
 
 class NERModel(torch.nn.Module):
     def __init__(self, num_labels, bert_model=None):
@@ -18,7 +19,13 @@ class NERModel(torch.nn.Module):
         self.classifier = torch.nn.Linear(self.bert.config.hidden_size, num_labels)
         self.crf = CRF(num_labels, batch_first=True)
 
+        self.bert.to(DEVICE)
+        self.crf.to(DEVICE)
+
     def forward(self, inputs, labels=None):
+        for key in inputs.keys():
+            inputs[key].to(DEVICE)
+
         bert_outputs = self.bert(**inputs)
         dropout_output = self.dropout(bert_outputs[0])
         classifier_output = self.classifier(dropout_output)
@@ -28,6 +35,7 @@ class NERModel(torch.nn.Module):
         predict = self.crf.decode(crf_emissions, mask=crf_masks)
 
         if labels != None:
+            labels.to(DEVICE)
             crf_tags = labels[:,1:]
             loss = self.crf(crf_emissions, crf_tags, mask=crf_masks) * (-1)
             return predict, crf_tags[crf_masks == 1], loss
