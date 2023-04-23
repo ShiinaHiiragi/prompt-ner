@@ -1,6 +1,6 @@
 import torch
 from utils.metrics import calc_acc
-from utils.constants import DEVICE
+from utils.constants import DEVICE, LABEL_ENTITY
 from PromptWeaver import BartPromptOperator
 
 GRAM = 4
@@ -22,7 +22,7 @@ def calc_labels_entity(dataset):
         )
     ))
 
-    return { item: BartPromptOperator.LABEL_ENTITY[item] for item in labels }
+    return { item: LABEL_ENTITY[item] for item in labels }
 
 def generate_template(sentence_str, start_point, part_labels_entity):
     result = []

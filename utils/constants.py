@@ -8,3 +8,10 @@ SPECIAL_TOKENS = [CLS_TOKEN, SEP_TOKEN, PAD_TOKEN]
 SPECIAL_ID = -1
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+LABEL_ENTITY = {
+    "LOC": "地点",
+    "ORG": "组织",
+    "PER": "人名",
+    "GPE": "地缘政治实体"
+}
