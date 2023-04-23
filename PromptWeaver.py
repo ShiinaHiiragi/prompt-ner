@@ -83,11 +83,16 @@ class BartPromptOperator(PromptOperator):
         return result
 
 class EntailPromptOperator(PromptOperator):
-    def __init__(self, reader, ratio=3):
+    def __init__(self, reader, ratio=1.5):
         super().__init__(reader)
         self.ratio = ratio
 
+    def _format(self, sentence, label):
+        return []
+
 if __name__ == "__main__":
-    DATASET_NAME = "msra.bart.min"
-    prompt_op = BartPromptOperator(f"./data/{DATASET_NAME}.dev")
-    prompt_op.dump(f"./prompts/{DATASET_NAME}.dev.tsv")
+    INPUT_DATASET_NAME = "msra.min"
+    OUTPUT_DATASET_NAME = "msra.entail.min"
+
+    prompt_op = BartPromptOperator(f"./data/{INPUT_DATASET_NAME}.dev")
+    prompt_op.dump(f"./prompts/{OUTPUT_DATASET_NAME}.dev.tsv")
