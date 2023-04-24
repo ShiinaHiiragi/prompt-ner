@@ -573,7 +573,6 @@ class Seq2SeqModel:
             warmup_steps if args.warmup_steps == 0 else args.warmup_steps
         )
 
-        # TODO: Use custom optimizer like with BertSum?
         if args.optimizer == "AdamW":
             optimizer = AdamW(
                 optimizer_grouped_parameters,
