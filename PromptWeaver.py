@@ -85,11 +85,14 @@ class BartPromptOperator(PromptOperator):
 class EntailPromptOperator(PromptOperator):
     POSITIVE_FLAG = "对"
     NEGATIVE_FLAG = "错"
+    MASK_FLAG = "[MASK]"
 
     # true positive:  「韩国」是地名实体
     # true negative:  「城市」不是命名实体
     TRUE_TEMPLATE = {
+        "test_positive": "“{candidate_span}”是一个{entity_type}实体。" + MASK_FLAG,
         "true_positive": "“{candidate_span}”是一个{entity_type}实体。" + POSITIVE_FLAG,
+        "test_negative": "“{word_span}”不是一个命名实体。" + MASK_FLAG,
         "true_negative": "“{word_span}”不是一个命名实体。" + POSITIVE_FLAG
     }
 

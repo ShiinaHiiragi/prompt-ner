@@ -1,7 +1,7 @@
 import torch
 from utils.metrics import calc_acc
 from utils.constants import DEVICE, LABEL_ENTITY
-from PromptWeaver import BartPromptOperator
+from PromptWeaver import BartPromptOperator, EntailPromptOperator
 
 GRAM = 4
 
@@ -10,6 +10,17 @@ def baseline_test(dataset, model):
     _, (X, Y) = next(enumerate(test_loader))
     predict, ans, loss = model(X, Y)
     return calc_acc(predict, ans)
+
+def find_token(tokenizer):
+    positive_token = int(tokenizer(EntailPromptOperator.POSITIVE_FLAG, return_tensors="pt")["input_ids"][0][1])
+    negative_token = int(tokenizer(EntailPromptOperator.NEGATIVE_FLAG, return_tensors="pt")["input_ids"][0][1])
+    return {
+        EntailPromptOperator.POSITIVE_FLAG: positive_token,
+        EntailPromptOperator.NEGATIVE_FLAG: negative_token
+    }, {
+        positive_token: EntailPromptOperator.POSITIVE_FLAG,
+        negative_token: EntailPromptOperator.NEGATIVE_FLAG
+    }
 
 def calc_labels_entity(dataset):
     labels = list(set(
