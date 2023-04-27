@@ -1,4 +1,5 @@
 import torch
+from math import exp
 from utils.metrics import calc_acc
 from utils.segment import cut
 from utils.constants import DEVICE, LABEL_ENTITY, NULL_LABEL, MASK_TOKEN
@@ -36,6 +37,9 @@ def calc_labels_entity(dataset):
 
     return { item: LABEL_ENTITY[item] for item in labels }
 
+def calc_prob_score(positive, negative):
+    return positive - negative
+
 def predict_word_cut(model, tokenizer, sentence_str, word, flag_token):
     label_entity_keys = list(LABEL_ENTITY.keys())
 
@@ -63,22 +67,32 @@ def predict_word_cut(model, tokenizer, sentence_str, word, flag_token):
         for key in positive_inputs.keys():
             positive_inputs[key].to(DEVICE)
 
-        for key in negative_inputs.keys():
-            negative_inputs[key].to(DEVICE)
+        for key in negative_input.keys():
+            negative_input[key].to(DEVICE)
 
         positive_outputs = model(**positive_inputs)[0]
         negative_output = model(**negative_input)[0]
+
         positive_token = flag_token[EntailPromptOperator.POSITIVE_FLAG]
+        negative_token = flag_token[EntailPromptOperator.NEGATIVE_FLAG]
 
         for batch, index in enumerate(positive_mask_index):
+            positive_prob_vector = positive_outputs[index[0]][index[1]]
             result.append((
                 label_entity_keys[batch],
-                float(positive_outputs[index[0]][index[1]][positive_token])
+                calc_prob_score(
+                    float(positive_prob_vector[positive_token]),
+                    float(positive_prob_vector[negative_token])
+                )
             ))
 
+        negative_prob_vector = negative_output[negative_mask_index[0, 0]][negative_mask_index[0, 1]]
         result.append((
             NULL_LABEL,
-            float(negative_output[negative_mask_index[0, 0]][negative_mask_index[0, 1]][positive_token])
+            calc_prob_score(
+                float(negative_prob_vector[positive_token]),
+                float(negative_prob_vector[negative_token])
+            )
         ))
 
     return max(result, key=lambda item: item[1])
