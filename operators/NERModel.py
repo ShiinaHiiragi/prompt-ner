@@ -35,8 +35,10 @@ class NERModel(torch.nn.Module):
         predict = self.crf.decode(crf_emissions, mask=crf_masks)
 
         if labels != None:
-            labels.to(DEVICE)
             crf_tags = labels[:,1:]
+            crf_emissions.to(DEVICE)
+            crf_tags.to(DEVICE)
+            crf_masks.to(DEVICE)
             loss = self.crf(crf_emissions, crf_tags, mask=crf_masks) * (-1)
             return predict, crf_tags[crf_masks == 1], loss
 

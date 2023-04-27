@@ -60,6 +60,12 @@ def predict_word_cut(model, tokenizer, sentence_str, word, flag_token):
 
     result = []
     with torch.no_grad():
+        for key in positive_inputs.keys():
+            positive_inputs[key].to(DEVICE)
+
+        for key in negative_inputs.keys():
+            negative_inputs[key].to(DEVICE)
+
         positive_outputs = model(**positive_inputs)[0]
         negative_output = model(**negative_input)[0]
         positive_token = flag_token[EntailPromptOperator.POSITIVE_FLAG]
