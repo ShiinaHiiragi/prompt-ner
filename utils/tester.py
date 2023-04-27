@@ -1,6 +1,7 @@
 import torch
 from utils.metrics import calc_acc
-from utils.constants import DEVICE, LABEL_ENTITY
+from utils.segment import cut
+from utils.constants import DEVICE, LABEL_ENTITY, NULL_LABEL, MASK_TOKEN
 from PromptWeaver import BartPromptOperator, EntailPromptOperator
 
 GRAM = 4
@@ -27,13 +28,73 @@ def calc_labels_entity(dataset):
         map(
             lambda item: item[2:],
             filter(
-                lambda item: item != "O",
+                lambda item: item != NULL_LABEL,
                 dataset.id_label
             )
         )
     ))
 
     return { item: LABEL_ENTITY[item] for item in labels }
+
+def predict_word_cut(model, tokenizer, sentence_str, word, flag_token):
+    label_entity_keys = list(LABEL_ENTITY.keys())
+
+    test_positive = list(map(
+        lambda key: sentence_str + EntailPromptOperator.TRUE_TEMPLATE["test_positive"].format(
+            candidate_span=word,
+            entity_type=LABEL_ENTITY[key]
+        ),
+        label_entity_keys
+    ))
+    test_negative = sentence_str + EntailPromptOperator.TRUE_TEMPLATE["test_negative"].format(word_span=word)
+
+    positive_inputs = tokenizer(
+        test_positive,
+        padding=True,
+        truncation=True,
+        return_tensors="pt"
+    )
+    negative_input = tokenizer(test_negative, return_tensors="pt")
+    positive_mask_index = (positive_inputs["input_ids"] == MASK_TOKEN).nonzero()
+    negative_mask_index = (negative_input["input_ids"] == MASK_TOKEN).nonzero()
+
+    result = []
+    with torch.no_grad():
+        positive_outputs = model(**positive_inputs)[0]
+        negative_output = model(**negative_input)[0]
+        positive_token = flag_token[EntailPromptOperator.POSITIVE_FLAG]
+
+        for batch, index in enumerate(positive_mask_index):
+            result.append((
+                label_entity_keys[batch],
+                float(positive_outputs[index[0]][index[1]][positive_token])
+            ))
+
+        result.append((
+            NULL_LABEL,
+            float(negative_output[negative_mask_index[0, 0]][negative_mask_index[0, 1]][positive_token])
+        ))
+
+    return max(result, key=lambda item: item[1])
+
+def entail_test(model, tokenizer, reader):
+    flag_token, token_flag = find_token(tokenizer)
+
+    predicts = []
+    for sentence in reader.sentences:
+        sentence_str = "".join(sentence)
+        words = cut(sentence_str)
+        predict = []
+        for word in words:
+            word_result = predict_word_cut(model, tokenizer, sentence_str, word, flag_token)[0]
+            for idx, ch in enumerate(word):
+                if word_result != NULL_LABEL:
+                    predict.append(f"I-{word_result}" if idx else f"B-{word_result}")
+                else:
+                    predict.append(word_result)
+        predicts.append(predict)
+
+    return predicts
 
 def generate_template(sentence_str, start_point, part_labels_entity):
     result = []
@@ -48,7 +109,7 @@ def generate_template(sentence_str, start_point, part_labels_entity):
 
     def find_tag(index):
         part_labels = list(part_labels_entity.keys())
-        part_labels.insert(0, "O")
+        part_labels.insert(0, NULL_LABEL)
         label_size = len(part_labels)
 
         span_size = index // label_size + 1
@@ -97,7 +158,7 @@ def mark_label(predict, sentence_size):
                 right += 1
         left += 1
 
-    labels = ["O"] * sentence_size
+    labels = [NULL_LABEL] * sentence_size
     for item in predict:
         left, right = item["interval"]
         labels[left:right] = [f"I-{item['type']}"] * (right - left)
@@ -114,7 +175,7 @@ def predict_labels(model, dataset, sentence_str):
         templates, find_tag = generate_template(sentence_str, start_point, part_labels_entity)
         max_index, max_score = calc_max_possible(model, dataset.tokenizer, sentence_str, templates)
         span_size, span_type = find_tag(max_index)
-        if span_type != "O":
+        if span_type != NULL_LABEL:
             predict.append({
                 "interval": (start_point, start_point + span_size),
                 "type": span_type,
