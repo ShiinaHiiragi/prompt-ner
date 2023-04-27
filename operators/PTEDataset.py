@@ -29,14 +29,15 @@ class PTEDataset(torch.utils.data.Dataset):
         self.inputs = text_tokenized
         self.labels = self.inputs["input_ids"].detach().clone()
 
-        self.flag = set()
+        self.token = set()
         for index in range(self.shape[0]):
             for sub_index in range(self.shape[1]):
                 if int(self.inputs["input_ids"][index][sub_index]) == SEP_TOKEN:
-                    self.flag.add(int(self.inputs["input_ids"][index][sub_index - 1]))
+                    self.token.add(int(self.inputs["input_ids"][index][sub_index - 1]))
                     self.inputs["input_ids"][index][sub_index - 1] = MASK_TOKEN
 
-        self.flag = tokenizer.convert_ids_to_tokens(list(self.flag))
+        self.token = list(self.token)
+        self.flag = tokenizer.convert_ids_to_tokens(self.token)
 
     def __getitem__(self, index):
         return { key: self.inputs[key][index] for key in self.inputs.keys() }, self.labels[index]

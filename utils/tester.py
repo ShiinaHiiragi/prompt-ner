@@ -1,5 +1,4 @@
 import torch
-from math import exp
 from utils.metrics import calc_acc
 from utils.segment import cut
 from utils.constants import DEVICE, LABEL_ENTITY, NULL_LABEL, MASK_TOKEN
@@ -14,8 +13,9 @@ def baseline_test(dataset, model):
     return calc_acc(predict, ans)
 
 def find_token(tokenizer):
-    positive_token = int(tokenizer(EntailPromptOperator.POSITIVE_FLAG, return_tensors="pt")["input_ids"][0][1])
-    negative_token = int(tokenizer(EntailPromptOperator.NEGATIVE_FLAG, return_tensors="pt")["input_ids"][0][1])
+    positive_token = tokenizer.convert_tokens_to_ids(EntailPromptOperator.POSITIVE_FLAG)
+    negative_token = tokenizer.convert_tokens_to_ids(EntailPromptOperator.NEGATIVE_FLAG)
+
     return {
         EntailPromptOperator.POSITIVE_FLAG: positive_token,
         EntailPromptOperator.NEGATIVE_FLAG: negative_token
@@ -98,7 +98,7 @@ def predict_word_cut(model, tokenizer, sentence_str, word, flag_token):
     return max(result, key=lambda item: item[1])
 
 def entail_test(model, tokenizer, reader):
-    flag_token, token_flag = find_token(tokenizer)
+    flag_token, _ = find_token(tokenizer)
 
     predicts = []
     for sentence in reader.sentences:
