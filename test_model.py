@@ -1,7 +1,14 @@
 from pprint import pprint
 
-def test_bert_base_chinese():
+def truncate():
+    from operators.CONLLReader import CONLLReader
 
+    reader = CONLLReader("./data/msra.dev")
+    reader.sentences = reader.sentences[:100]
+    reader.labels = reader.labels[:100]
+    reader.dump("./data/msra.lite.dev")
+
+def test_bert_base_chinese():
     from transformers import AutoTokenizer, BertForMaskedLM
     from transformers import pipeline
     from utils.saver import tokenizer_loader, model_loader

@@ -22,7 +22,7 @@ class NERDataset(torch.utils.data.Dataset):
         self.length = reader.length
 
         self.id_label = list(self.reader.domain)
-        self.id_label.sort()
+        self.id_label.sort(reverse=True)
         self.num_labels = len(self.id_label)
         self.label_id = { item : index for index, item in enumerate(self.id_label) }
 
