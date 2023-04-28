@@ -1,6 +1,6 @@
 import torch
 from transformers import BertModel
-from torchcrf import CRF
+from TorchCRF import CRF
 
 from operators.NERDataset import crf_mask
 from utils.saver import model_loader
@@ -20,11 +20,13 @@ class NERModel(torch.nn.Module):
         self.crf = CRF(num_labels, batch_first=True)
 
         self.bert.to(DEVICE)
+        self.dropout.to(DEVICE)
+        self.classifier.to(DEVICE)
         self.crf.to(DEVICE)
 
     def forward(self, inputs, labels=None):
         for key in inputs.keys():
-            inputs[key].to(DEVICE)
+            inputs[key] = inputs[key].to(DEVICE)
 
         bert_outputs = self.bert(**inputs)
         dropout_output = self.dropout(bert_outputs[0])
@@ -36,9 +38,9 @@ class NERModel(torch.nn.Module):
 
         if labels != None:
             crf_tags = labels[:,1:]
-            crf_emissions.to(DEVICE)
-            crf_tags.to(DEVICE)
-            crf_masks.to(DEVICE)
+            crf_emissions = crf_emissions.to(DEVICE)
+            crf_tags = crf_tags.to(DEVICE)
+            crf_masks = crf_masks.to(DEVICE)
             loss = self.crf(crf_emissions, crf_tags, mask=crf_masks) * (-1)
             return predict, crf_tags[crf_masks == 1], loss
 

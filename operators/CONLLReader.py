@@ -11,7 +11,7 @@ class CONLLReader:
         sentences = [[]]
         labels = [[]]
         size, max_size = 0, 0
-        with open(self.filename, "r") as f:
+        with open(self.filename, "r", encoding="utf-8") as f:
             for line in f:
                 items = line.strip().split("\t")
                 if len(items) > 1:
@@ -39,7 +39,7 @@ class CONLLReader:
 
     def dump(self, filename):
         outer_size = self.length()
-        with open(filename, "w") as f:
+        with open(filename, "w", encoding="utf-8") as f:
             for index in range(outer_size):
                 inner_size = len(self.sentences[index])
                 for sub_index in range(inner_size):

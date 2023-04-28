@@ -25,7 +25,7 @@ class PromptOperator:
         for sentence, label in shuffled:
             self.__container += self._format(sentence, label)
 
-        with open(filename, "w") as f:
+        with open(filename, "w", encoding="utf-8") as f:
             for line in self.__container:
                 f.write(line)
                 f.write("\n")
