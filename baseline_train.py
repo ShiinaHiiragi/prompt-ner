@@ -46,4 +46,3 @@ def train(dataset, model, optimizer):
 
 LOG("MODEL LOADED")
 train_loop(train_dataset, dev_dataset, model)
-model.save_pretrained(f"./pretrained/model/fine-tune/{MODEL_NAME}")
