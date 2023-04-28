@@ -1,6 +1,6 @@
 import torch
 
-def bart_calc_acc(predict, ans):
+def calc_acc(predict, ans):
     correct, total = 0, 0
     for index in range(len(predict)):
         for sub_index in range(len(predict[index])):

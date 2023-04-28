@@ -2,7 +2,7 @@ import torch
 from tqdm import tqdm
 from utils.segment import cut
 from utils.constants import DEVICE, LABEL_ENTITY, NULL_LABEL, MASK_TOKEN, GRAM
-from utils.metrics import bart_calc_acc
+from utils.metrics import calc_acc
 from PromptWeaver import BartPromptOperator, EntailPromptOperator
 
 def baseline_test(dataset, model):
@@ -13,7 +13,7 @@ def baseline_test(dataset, model):
             predict, ans, loss = model(batch_X, batch_Y)
             all_predict.append(predict[0])
             all_ans.append(ans.to("cpu").tolist())
-        return bart_calc_acc(all_predict, all_ans)
+        return calc_acc(all_predict, all_ans)
 
 def find_token(tokenizer):
     positive_token = tokenizer.convert_tokens_to_ids(EntailPromptOperator.POSITIVE_FLAG)

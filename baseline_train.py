@@ -17,11 +17,11 @@ MODEL_NAME = "baseline-msra"
 
 train_reader = CONLLReader(f"./data/{DATASET_NAME}.train")
 dev_reader = CONLLReader(f"./data/{DATASET_NAME}.dev")
-test_reader = CONLLReader(f"./data/{DATASET_NAME}.test")
 
 LOG("READER LOADED")
-assert train_reader.domain == dev_reader.domain
-assert train_reader.domain == test_reader.domain
+# test_reader = CONLLReader(f"./data/{DATASET_NAME}.test")
+# assert train_reader.domain == dev_reader.domain
+# assert train_reader.domain == test_reader.domain
 
 tokenizer = tokenizer_loader(AutoTokenizer, "bert-base-chinese")
 train_dataset = NERDataset(tokenizer=tokenizer, reader=train_reader)
