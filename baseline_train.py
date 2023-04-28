@@ -5,6 +5,7 @@ from tqdm import tqdm
 from utils.constants import DEVICE, LOG
 from utils.saver import tokenizer_loader
 from utils.tester import baseline_test
+from operators.CONLLReader import CONLLReader
 from operators.NERDataset import NERDataset
 from operators.NERModel import NERModel
 
@@ -14,15 +15,18 @@ BATCH_SIZE = 32
 DATASET_NAME = "msra"
 MODEL_NAME = "baseline-msra"
 
-tokenizer = tokenizer_loader(AutoTokenizer, "bert-base-chinese")
-train_dataset = NERDataset(tokenizer=tokenizer, reader=f"./data/{DATASET_NAME}.train")
-dev_dataset = NERDataset(tokenizer=tokenizer, reader=f"./data/{DATASET_NAME}.dev")
-test_dataset = NERDataset(tokenizer=tokenizer, reader=f"./data/{DATASET_NAME}.test")
-model = NERModel(train_dataset.num_labels, bert_model="bert-base-chinese")
+train_reader = CONLLReader(f"./data/{DATASET_NAME}.train")
+dev_reader = CONLLReader(f"./data/{DATASET_NAME}.dev")
+test_reader = CONLLReader(f"./data/{DATASET_NAME}.test")
 
-LOG("LOADED")
-assert train_dataset.id_label == dev_dataset.id_label
-assert train_dataset.id_label == test_dataset.id_label
+LOG("READER LOADED")
+assert train_reader.domain == dev_reader.domain
+assert train_reader.domain == test_reader.domain
+
+tokenizer = tokenizer_loader(AutoTokenizer, "bert-base-chinese")
+train_dataset = NERDataset(tokenizer=tokenizer, reader=train_reader)
+dev_dataset = NERDataset(tokenizer=tokenizer, reader=dev_reader)
+model = NERModel(train_dataset.num_labels, bert_model="bert-base-chinese")
 
 def train_loop(train_dataset, dev_dataset, model):
     optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
@@ -39,5 +43,6 @@ def train(dataset, model, optimizer):
         loss.backward()
         optimizer.step()
 
+LOG("MODEL LOADED")
 train_loop(train_dataset, dev_dataset, model)
 model.save_pretrained(f"./pretrained/model/fine-tune/{MODEL_NAME}")
