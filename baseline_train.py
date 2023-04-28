@@ -9,7 +9,7 @@ from operators.CONLLReader import CONLLReader
 from operators.NERDataset import NERDataset
 from operators.NERModel import NERModel
 
-LEARNING_RATE = 5e-3
+LEARNING_RATE = 5e-5
 EPOCH = 1
 BATCH_SIZE = 4
 DATASET_NAME = "msra"
