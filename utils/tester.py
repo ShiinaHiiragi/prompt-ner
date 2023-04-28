@@ -1,16 +1,19 @@
 import torch
-from utils.metrics import calc_acc
+from tqdm import tqdm
 from utils.segment import cut
-from utils.constants import DEVICE, LABEL_ENTITY, NULL_LABEL, MASK_TOKEN
+from utils.constants import DEVICE, LABEL_ENTITY, NULL_LABEL, MASK_TOKEN, GRAM
+from utils.metrics import bart_calc_acc
 from PromptWeaver import BartPromptOperator, EntailPromptOperator
 
-GRAM = 4
-
 def baseline_test(dataset, model):
-    test_loader = torch.utils.data.DataLoader(dataset, batch_size=dataset.length)
-    _, (X, Y) = next(enumerate(test_loader))
-    predict, ans, loss = model(X, Y)
-    return calc_acc(predict, ans)
+    test_loader = torch.utils.data.DataLoader(dataset, batch_size=1)
+    with torch.no_grad():
+        all_predict, all_ans = [], []
+        for batch_index, (batch_X, batch_Y) in enumerate(tqdm(test_loader)):
+            predict, ans, loss = model(batch_X, batch_Y)
+            all_predict.append(predict[0])
+            all_ans.append(ans.to("cpu").tolist())
+        return bart_calc_acc(all_predict, all_ans)
 
 def find_token(tokenizer):
     positive_token = tokenizer.convert_tokens_to_ids(EntailPromptOperator.POSITIVE_FLAG)

@@ -8,6 +8,7 @@ PAD_TOKEN = 0
 SPECIAL_TOKENS = [CLS_TOKEN, SEP_TOKEN, PAD_TOKEN]
 SPECIAL_ID = -1
 
+GRAM = 4
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 NULL_LABEL = "O"
