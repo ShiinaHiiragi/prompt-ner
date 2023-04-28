@@ -24,6 +24,8 @@ class CONLLReader:
                     max_size = max(size, max_size)
                     size = 0
 
+            max_size = max(size, max_size)
+
         self.sentences = sentences
         self.labels = labels
 
@@ -38,7 +40,7 @@ class CONLLReader:
                 self.domain.add(item)
 
     def dump(self, filename):
-        outer_size = self.length()
+        outer_size = len(self.sentences)
         with open(filename, "w", encoding="utf-8") as f:
             for index in range(outer_size):
                 inner_size = len(self.sentences[index])
