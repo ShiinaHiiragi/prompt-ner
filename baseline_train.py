@@ -11,7 +11,7 @@ from operators.NERModel import NERModel
 
 LEARNING_RATE = 5e-3
 EPOCH = 4
-BATCH_SIZE = 32
+BATCH_SIZE = 8
 DATASET_NAME = "msra"
 MODEL_NAME = "baseline-msra"
 
@@ -32,8 +32,9 @@ def train_loop(train_dataset, dev_dataset, model):
     optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
     for index in range(EPOCH):
         train(train_dataset, model, optimizer)
+        model.save_pretrained(f"./pretrained/model/fine-tune/{MODEL_NAME}-epoch{index:02d}")
         dev_acc = baseline_test(dev_dataset, model)
-        print(f"Epoch{index: 2d}: {dev_acc}")
+        print(f"Epoch {index:02d}: {dev_acc}")
 
 def train(dataset, model, optimizer):
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE)
