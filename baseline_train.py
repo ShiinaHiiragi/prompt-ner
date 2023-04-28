@@ -16,14 +16,14 @@ DATASET_NAME = "msra"
 MODEL_NAME = "baseline-msra"
 
 train_reader = CONLLReader(f"./data/{DATASET_NAME}.train")
-dev_reader = CONLLReader(f"./data/{DATASET_NAME}.dev")
+dev_reader = CONLLReader(f"./data/{DATASET_NAME}.lite.dev")
+tokenizer = tokenizer_loader(AutoTokenizer, "bert-base-chinese")
 
-LOG("READER LOADED")
 # test_reader = CONLLReader(f"./data/{DATASET_NAME}.test")
 # assert train_reader.domain == dev_reader.domain
 # assert train_reader.domain == test_reader.domain
 
-tokenizer = tokenizer_loader(AutoTokenizer, "bert-base-chinese")
+LOG("READER & TOKENIZER LOADED")
 train_dataset = NERDataset(tokenizer=tokenizer, reader=train_reader)
 dev_dataset = NERDataset(tokenizer=tokenizer, reader=dev_reader)
 model = NERModel(train_dataset.num_labels, bert_model="bert-base-chinese")
@@ -31,18 +31,19 @@ model = NERModel(train_dataset.num_labels, bert_model="bert-base-chinese")
 def train_loop(train_dataset, dev_dataset, model):
     optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
     for index in range(EPOCH):
-        train(train_dataset, model, optimizer)
+        train(train_dataset, dev_dataset, model, optimizer)
         model.save_pretrained(f"./pretrained/model/fine-tune/{MODEL_NAME}-epoch{index:02d}")
-        dev_acc = baseline_test(dev_dataset, model)
-        print(f"Epoch {index:02d}: {dev_acc}")
 
-def train(dataset, model, optimizer):
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE)
+def train(train_dataset, dev_dataset, model, optimizer):
+    dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
     for batch_index, (batch_X, batch_Y) in enumerate(tqdm(dataloader)):
         _, __, loss = model(batch_X, batch_Y)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        if batch_index > 0 and batch_index % 100 == 0:
+            dev_acc = baseline_test(dev_dataset, model)
+            LOG(f"\nDEV ACC: {dev_acc}")
 
-LOG("MODEL LOADED")
+LOG("DATASET & MODEL LOADED")
 train_loop(train_dataset, dev_dataset, model)
