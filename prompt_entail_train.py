@@ -9,7 +9,7 @@ from utils.metrics import calc_acc, calc_f1
 from operators.PTEDataset import PTEDataset
 from PromptWeaver import EntailPromptOperator
 
-DATASET_NAME = "min.entail"
+DATASET_NAME = "msra.entail"
 LEARNING_RATE = 1e-5
 EPOCH = 1
 BATCH_SIZE = 4
