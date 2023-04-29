@@ -17,3 +17,5 @@ __pycache__
 /record.md
 
 /utils/thulac/models
+/prompts/msra.bart.train.tsv
+/prompts/msra.entail.train.tsv

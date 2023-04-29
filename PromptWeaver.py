@@ -2,7 +2,7 @@ import re
 from random import random, randint
 from utils import han
 from utils.segment import cut
-from utils.constants import LABEL_ENTITY
+from utils.constants import LABEL_ENTITY, LOG
 from operators.PromptOperator import PromptOperator
 
 class BartPromptOperator(PromptOperator):
@@ -229,5 +229,6 @@ if __name__ == "__main__":
     for DATASET_NAME in ["min", "msra", "weibo"]:
         for PROMPT_CLASS in ["bart", "entail"]:
             for suffix in ["train", "dev"]:
+                LOG(f"WRITING prompts/{DATASET_NAME}.{PROMPT_CLASS}.{suffix}.tsv")
                 prompt_op = EntailPromptOperator(f"./data/{DATASET_NAME}.{suffix}")
                 prompt_op.dump(f"./prompts/{DATASET_NAME}.{PROMPT_CLASS}.{suffix}.tsv")
