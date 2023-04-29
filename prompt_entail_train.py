@@ -5,6 +5,7 @@ from transformers import AutoTokenizer, BertForMaskedLM
 from utils.saver import tokenizer_loader, model_loader
 from utils.constants import MASK_TOKEN, LOG
 from utils.tester import find_token
+from utils.metrics import calc_acc, calc_f1
 from operators.PTEDataset import PTEDataset
 from PromptWeaver import EntailPromptOperator
 
@@ -46,19 +47,16 @@ def validate(dataset, model, tokenizer):
     negative_token = tokenizer.convert_tokens_to_ids(EntailPromptOperator.NEGATIVE_FLAG)
     mask_index = (X["input_ids"] == MASK_TOKEN).nonzero()
 
-    correct, total = 0, 0
     with torch.no_grad():
         outputs = model(**X)[0]
+        all_predict, all_ans = [[]], [[]]
         for index in mask_index:
             prob_vector = outputs[index[0], index[1]]
             ans = Y[index[0], index[1]]
             positive, negative = prob_vector[positive_token], prob_vector[negative_token]
-            if (positive > negative and ans == positive_token) or \
-                (positive < negative and ans == negative_token):
-                correct += 1
-            total += 1
-
-    return correct / total
+            all_predict[0].append(1 if positive > negative else 0)
+            all_ans[0].append(1 if ans == positive_token else 0)
+        return calc_acc(all_predict, all_ans), calc_f1(all_predict, all_ans)
 
 LOG(train_dataset.flag)
 train_loop(train_dataset, dev_dataset, dev_lite_dataset, model, tokenizer)
