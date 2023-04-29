@@ -19,8 +19,9 @@ class BartPromptOperator(PromptOperator):
     DEFAULT_LOWER_BOND = 0.25
     NEGATIVE_LOWER_BOND = lambda self, ratio: 0 if random() > ratio else 1
 
-    def __init__(self, reader):
+    def __init__(self, reader, droupout=1):
         super().__init__(reader)
+        self.droupout = droupout
 
     def __generate_golden_entity(self, sentence, label):
         golden_entity = []
@@ -62,6 +63,9 @@ class BartPromptOperator(PromptOperator):
         return words
 
     def _format(self, sentence, label):
+        if random() > self.droupout:
+            return []
+
         result = []
         sentence_str = "".join(sentence)
         golden_entity = self.__generate_golden_entity(sentence, label)
@@ -122,8 +126,9 @@ class EntailPromptOperator(PromptOperator):
     DEFAULT_LOWER_BOND = 0.25
     NEGATIVE_LOWER_BOND = lambda self, ratio: 0 if random() > ratio else 1
 
-    def __init__(self, reader):
-        super().__init__(reader)
+    def __init__(self, reader, droupout):
+        super().__init__(reader, droupout=1)
+        self.droupout = droupout
 
     def __generate_golden_entity(self, sentence, label):
         golden_entity = []
@@ -165,6 +170,9 @@ class EntailPromptOperator(PromptOperator):
         return words
 
     def _format(self, sentence, label):
+        if random() > self.droupout:
+            return []
+
         result = []
         sentence_str = "".join(sentence)
 
