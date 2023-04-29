@@ -8,7 +8,7 @@ from utils.tester import find_token
 from operators.PTEDataset import PTEDataset
 from PromptWeaver import EntailPromptOperator
 
-DATASET_NAME = "min.entail"
+DATASET_NAME = "msra.entail"
 LEARNING_RATE = 1e-5
 EPOCH = 1
 BATCH_SIZE = 4

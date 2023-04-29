@@ -9,10 +9,9 @@ class BartPromptOperator(PromptOperator):
     POSITIVE_TEMPLATE = "“{candidate_span}”是一个{entity_type}实体"
     NEGATIVE_TEMPLATE = "“{candidate_span}”不是一个命名实体"
 
-    COUNTER_MAX = 100
-    NEGATIVE_LOWER_BOND = 2
+    NEGATIVE_LOWER_BOND = lambda self, ratio: 0 if random() > ratio else 1
 
-    def __init__(self, reader, ratio=1.5):
+    def __init__(self, reader, ratio=0.75):
         super().__init__(reader)
         self.ratio = ratio
 
@@ -46,23 +45,9 @@ class BartPromptOperator(PromptOperator):
         entities = list(map(lambda item: item[0], golden_entity))
         self.__clear_invalid_words(words, entities)
 
-        negative_count = max(self.NEGATIVE_LOWER_BOND, round(len(entities) * self.ratio))
+        negative_count = max(self.NEGATIVE_LOWER_BOND(0.25), round(len(entities) * self.ratio))
         while negative_count < len(words):
             words.pop(randint(0, len(words) - 1))
-
-        counter = 0
-        while negative_count > len(words):
-            rand_segment = segments[randint(0, len(segments) - 1)]
-            rand_range_left = randint(0, len(rand_segment) - 1)
-            rand_range_right = randint(rand_range_left + 1, len(rand_segment))
-            rand_span = rand_segment[rand_range_left:rand_range_right]
-            if not rand_span in words:
-                words.append(rand_span)
-
-            if counter < self.COUNTER_MAX:
-                counter += 1
-            else:
-                break
 
         return words
 
@@ -105,15 +90,13 @@ class EntailPromptOperator(PromptOperator):
         "false_negative": "“{candidate_span}”不是一个命名实体。" + NEGATIVE_FLAG
     }
 
-    COUNTER_MAX = 100
-    NEGATIVE_LOWER_BOND = 1
+    NEGATIVE_LOWER_BOND = lambda self, ratio: 0 if random() > ratio else 1
 
     TRUE_POSITIVE_RATIO = 1
-    FALSE_POSITIVE_RATIO = 0.75
-    FALSE_NEGATIVE_RATIO = 0.75
+    FALSE_POSITIVE_RATIO = 0.25
+    FALSE_NEGATIVE_RATIO = 0.25
 
-    # F/T = 1 + 1/ratio
-    def __init__(self, reader, ratio=1):
+    def __init__(self, reader, ratio=0.5):
         super().__init__(reader)
         self.ratio = ratio
 
@@ -147,23 +130,9 @@ class EntailPromptOperator(PromptOperator):
         entities = list(map(lambda item: item[0], golden_entity))
         self.__clear_invalid_words(words, entities)
 
-        negative_count = max(self.NEGATIVE_LOWER_BOND, round(len(entities) * self.ratio))
+        negative_count = max(self.NEGATIVE_LOWER_BOND(0.25), round(len(entities) * self.ratio))
         while negative_count < len(words):
             words.pop(randint(0, len(words) - 1))
-
-        counter = 0
-        while negative_count > len(words):
-            rand_segment = segments[randint(0, len(segments) - 1)]
-            rand_range_left = randint(0, len(rand_segment) - 1)
-            rand_range_right = randint(rand_range_left + 1, len(rand_segment))
-            rand_span = rand_segment[rand_range_left:rand_range_right]
-            if not rand_span in words:
-                words.append(rand_span)
-
-            if counter < self.COUNTER_MAX:
-                counter += 1
-            else:
-                break
 
         return words
 
@@ -226,9 +195,14 @@ class EntailPromptOperator(PromptOperator):
         return result
 
 if __name__ == "__main__":
-    for DATASET_NAME in ["min", "msra", "weibo"]:
-        for PROMPT_CLASS in ["bart", "entail"]:
+    OperatorClass = {
+        "bart": BartPromptOperator,
+        "entail": EntailPromptOperator
+    }
+
+    for dataset_name in ["min", "msra", "weibo"]:
+        for prompt_class in OperatorClass.keys():
             for suffix in ["train", "dev", "lite.dev"]:
-                LOG(f"WRITING prompts/{DATASET_NAME}.{PROMPT_CLASS}.{suffix}.tsv")
-                prompt_op = EntailPromptOperator(f"./data/{DATASET_NAME}.{suffix}")
-                prompt_op.dump(f"./prompts/{DATASET_NAME}.{PROMPT_CLASS}.{suffix}.tsv")
+                LOG(f"WRITING prompts/{dataset_name}.{prompt_class}.{suffix}.tsv")
+                prompt_op = OperatorClass[prompt_class](f"./data/{dataset_name}.{suffix}")
+                prompt_op.dump(f"./prompts/{dataset_name}.{prompt_class}.{suffix}.tsv")
