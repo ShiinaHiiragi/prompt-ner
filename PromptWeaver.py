@@ -228,7 +228,7 @@ class EntailPromptOperator(PromptOperator):
 if __name__ == "__main__":
     for DATASET_NAME in ["min", "msra", "weibo"]:
         for PROMPT_CLASS in ["bart", "entail"]:
-            for suffix in ["train", "dev"]:
+            for suffix in ["train", "dev", "lite.dev"]:
                 LOG(f"WRITING prompts/{DATASET_NAME}.{PROMPT_CLASS}.{suffix}.tsv")
                 prompt_op = EntailPromptOperator(f"./data/{DATASET_NAME}.{suffix}")
                 prompt_op.dump(f"./prompts/{DATASET_NAME}.{PROMPT_CLASS}.{suffix}.tsv")
