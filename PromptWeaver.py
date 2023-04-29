@@ -226,8 +226,8 @@ class EntailPromptOperator(PromptOperator):
         return result
 
 if __name__ == "__main__":
-    INPUT_DATASET_NAME = "msra.min"
-    OUTPUT_DATASET_NAME = "msra.entail.min"
-
-    prompt_op = EntailPromptOperator(f"./data/{INPUT_DATASET_NAME}.dev")
-    prompt_op.dump(f"./prompts/{OUTPUT_DATASET_NAME}.dev.tsv")
+    for DATASET_NAME in ["min", "msra", "weibo"]:
+        for PROMPT_CLASS in ["bart", "entail"]:
+            for suffix in ["train", "dev"]:
+                prompt_op = EntailPromptOperator(f"./data/{DATASET_NAME}.{suffix}")
+                prompt_op.dump(f"./prompts/{DATASET_NAME}.{PROMPT_CLASS}.{suffix}.tsv")
