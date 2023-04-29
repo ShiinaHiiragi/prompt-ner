@@ -50,7 +50,7 @@ def validate(dataset, model, tokenizer):
     with torch.no_grad():
         outputs = model(**X)[0]
         all_predict, all_ans = [[]], [[]]
-        for index in mask_index:
+        for index in tqdm(mask_index):
             prob_vector = outputs[index[0], index[1]]
             ans = Y[index[0], index[1]]
             positive, negative = prob_vector[positive_token], prob_vector[negative_token]
