@@ -15,7 +15,7 @@ BATCH_SIZE = 4
 DATASET_NAME = "msra"
 MODEL_NAME = "baseline-msra"
 
-train_reader = CONLLReader(f"./data/{DATASET_NAME}.train")
+train_reader = CONLLReader(f"./data/{DATASET_NAME}.lite.dev")
 dev_reader = CONLLReader(f"./data/{DATASET_NAME}.lite.dev")
 tokenizer = tokenizer_loader(AutoTokenizer, "bert-base-chinese")
 
