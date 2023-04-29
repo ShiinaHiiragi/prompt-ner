@@ -32,7 +32,7 @@ def train_loop(train_dataset, dev_dataset, model):
     optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
     for index in range(EPOCH):
         train(train_dataset, dev_dataset, model, optimizer)
-        model.save_pretrained(f"./pretrained/model/fine-tune/{MODEL_NAME}-epoch{index:02d}.pt")
+        model.save_pretrained(f"./pretrained/model/fine-tune/{MODEL_NAME}-epoch{index:02d}.pth")
 
 def train(train_dataset, dev_dataset, model, optimizer):
     dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
