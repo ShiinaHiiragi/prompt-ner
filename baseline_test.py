@@ -1,3 +1,4 @@
+import torch
 from transformers import AutoTokenizer
 from utils.saver import tokenizer_loader
 from utils.tester import baseline_test
@@ -8,7 +9,7 @@ from operators.NERModel import NERModel
 DATASET_NAME = "msra"
 tokenizer = tokenizer_loader(AutoTokenizer, "bert-base-chinese")
 test_dataset = NERDataset(tokenizer=tokenizer, reader=f"./data/{DATASET_NAME}.test")
-model = torch.load("fine-tune/baseline-msra-epoch00.pt")
+model = torch.load("./pretrained/model/fine-tune/baseline-msra-epoch00.pt")
 
 test_acc = baseline_test(test_dataset, model)
 LOG(f"TEST ACC: {test_acc}")
