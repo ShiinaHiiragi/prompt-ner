@@ -47,4 +47,4 @@ class NERModel(torch.nn.Module):
         return predict
 
     def save_pretrained(self, path):
-        self.bert.save_pretrained(path)
+        torch.save(self, path)

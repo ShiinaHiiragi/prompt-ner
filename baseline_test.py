@@ -8,7 +8,7 @@ from operators.NERModel import NERModel
 DATASET_NAME = "msra"
 tokenizer = tokenizer_loader(AutoTokenizer, "bert-base-chinese")
 test_dataset = NERDataset(tokenizer=tokenizer, reader=f"./data/{DATASET_NAME}.test")
-model = NERModel(test_dataset.num_labels, bert_model="fine-tune/baseline-msra-epoch00")
+model = torch.load("fine-tune/baseline-msra-epoch00.pt")
 
 test_acc = baseline_test(test_dataset, model)
 LOG(f"TEST ACC: {test_acc}")
