@@ -41,30 +41,30 @@ def train(train_dataset, dev_dataset, model, tokenizer, optimizer):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        if batch_index > 0 and batch_index % 1 == 0:
+        if batch_index > 0 and batch_index % 100 == 0:
             dev_acc = validate(dev_dataset, model, tokenizer)
             LOG(f"\nDEV ACC: {dev_acc}")
 
 def validate(dataset, model, tokenizer):
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=len(dataset))
-    _, (X, Y) = next(enumerate(dataloader))
-
     positive_token = tokenizer.convert_tokens_to_ids(EntailPromptOperator.POSITIVE_FLAG)
     negative_token = tokenizer.convert_tokens_to_ids(EntailPromptOperator.NEGATIVE_FLAG)
-    mask_index = (X["input_ids"] == MASK_TOKEN).nonzero()
 
     with torch.no_grad():
-        for key in X.keys():
-            X[key] = X[key].to(DEVICE)
-
-        outputs = model(**X)[0]
         all_predict, all_ans = [[]], [[]]
-        for index in tqdm(mask_index):
-            prob_vector = outputs[index[0], index[1]]
-            ans = Y[index[0], index[1]]
-            positive, negative = prob_vector[positive_token], prob_vector[negative_token]
-            all_predict[0].append(1 if positive > negative else 0)
-            all_ans[0].append(1 if ans == positive_token else 0)
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=1)
+
+        for index, (X, Y) in enumerate(tqdm(dataloader)):
+            for key in X.keys():
+                X[key] = X[key].to(DEVICE)
+
+            mask_index = (X["input_ids"] == MASK_TOKEN).nonzero()[0]
+            outputs = model(**X)[0]
+            prob_vector = outputs[mask_index[0], mask_index[1]]
+
+            all_predict[0].append(1 if prob_vector[positive_token] > prob_vector[negative_token] else 0)
+            all_ans[0].append(1 if Y[mask_index[0], mask_index[1]] == positive_token else 0)
+
+        LOG(all_predict, all_ans)
         return calc_acc(all_predict, all_ans), calc_f1(all_predict, all_ans)
 
 LOG(train_dataset.flag)
