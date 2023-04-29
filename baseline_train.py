@@ -15,23 +15,28 @@ BATCH_SIZE = 4
 DATASET_NAME = "msra"
 
 train_reader = CONLLReader(f"./data/{DATASET_NAME}.train")
+dev_reader = CONLLReader(f"./data/{DATASET_NAME}.dev")
 dev_lite_reader = CONLLReader(f"./data/{DATASET_NAME}.lite.dev")
 tokenizer = tokenizer_loader(AutoTokenizer, "bert-base-chinese")
 
 # test_reader = CONLLReader(f"./data/{DATASET_NAME}.test")
-# assert train_reader.domain == dev_lite_reader.domain
 # assert train_reader.domain == test_reader.domain
+# assert train_reader.domain == dev_reader.domain
+# assert train_reader.domain == dev_lite_reader.domain
 
 LOG("READER & TOKENIZER LOADED")
 train_dataset = NERDataset(tokenizer=tokenizer, reader=train_reader)
+dev_dataset = NERDataset(tokenizer=tokenizer, reader=dev_reader)
 dev_lite_dataset = NERDataset(tokenizer=tokenizer, reader=dev_lite_reader)
 model = NERModel(train_dataset.num_labels, bert_model="bert-base-chinese")
 
-def train_loop(train_dataset, dev_lite_dataset, model):
+def train_loop(train_dataset, dev_dataset, dev_lite_dataset, model):
     optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
     for index in range(EPOCH):
         train(train_dataset, dev_lite_dataset, model, optimizer)
-        model.save_pretrained(f"./pretrained/model/fine-tune/baseline-{DATASET_NAME}-epoch{index:02d}.pt")
+        model.save_pretrained(f"./pretrained/model/fine-tune/baseline-{DATASET_NAME}-epoch-{index:02d}.pt")
+        dev_acc = baseline_test(dev_dataset, model)
+        LOG(f"\nEpoch {index:02d}: {dev_acc}")
 
 def train(train_dataset, dev_lite_dataset, model, optimizer):
     dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
@@ -45,4 +50,4 @@ def train(train_dataset, dev_lite_dataset, model, optimizer):
             LOG(f"\nDEV ACC: {dev_acc}")
 
 LOG("DATASET & MODEL LOADED")
-train_loop(train_dataset, dev_lite_dataset, model)
+train_loop(train_dataset, dev_dataset, dev_lite_dataset, model)
