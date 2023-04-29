@@ -1,4 +1,5 @@
 import torch
+from tqdm import tqdm
 from transformers import AutoTokenizer, BertForMaskedLM
 
 from utils.saver import tokenizer_loader, model_loader
@@ -16,21 +17,26 @@ tokenizer = tokenizer_loader(AutoTokenizer, "bert-base-chinese")
 model = model_loader(BertForMaskedLM, "bert-base-chinese")
 train_dataset = PTEDataset(tokenizer=tokenizer, reader=f"./prompts/{DATASET_NAME}.train.tsv")
 dev_dataset = PTEDataset(tokenizer=tokenizer, reader=f"./prompts/{DATASET_NAME}.dev.tsv")
+dev_lite_dataset = PTEDataset(tokenizer=tokenizer, reader=f"./prompts/{DATASET_NAME}.lite.dev.tsv")
 
-def train_loop(train_dataset, dev_dataset, model, tokenizer):
+def train_loop(train_dataset, dev_dataset, dev_lite_dataset, model, tokenizer):
     optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
-    for _ in range(EPOCH):
-        train(train_dataset, model, optimizer)
+    for index in range(EPOCH):
+        train(train_dataset, dev_lite_dataset, model, tokenizer, optimizer)
+        model.save_pretrained(f"./pretrained/model/fine-tune/prompt-{DATASET_NAME.replace('.', '-')}-epoch-{index:02d}")
         dev_acc = validate(dev_dataset, model, tokenizer)
-        print(dev_acc)
+        LOG(f"\nEpoch {index:02d}: {dev_acc}")
 
-def train(dataset, model, optimizer):
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE)
-    for batch_index, (batch_X, batch_Y) in enumerate(dataloader):
+def train(train_dataset, dev_dataset, model, tokenizer, optimizer):
+    dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
+    for batch_index, (batch_X, batch_Y) in enumerate(tqdm(dataloader)):
         loss = model(**batch_X, labels=batch_Y).loss
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        if batch_index > 0 and batch_index % 100 == 0:
+            dev_acc = validate(dev_dataset, model, tokenizer)
+            LOG(f"\nDEV ACC: {dev_acc}")
 
 def validate(dataset, model, tokenizer):
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=len(dataset))
@@ -55,5 +61,4 @@ def validate(dataset, model, tokenizer):
     return correct / total
 
 LOG(train_dataset.flag)
-train_loop(train_dataset, dev_dataset, model, tokenizer)
-model.save_pretrained(f"./pretrained/model/fine-tune/prompt-entail")
+train_loop(train_dataset, dev_dataset, dev_lite_dataset, model, tokenizer)
