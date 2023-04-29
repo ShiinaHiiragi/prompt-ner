@@ -19,4 +19,4 @@ LABEL_ENTITY = {
     "GPE": "地缘政治实体名"
 }
 
-LOG = lambda msg: print(f"\033[1;31m{msg}\033[0m")
+LOG = lambda *msg: [print(f"\033[1;31m{it}\033[0m") for it in msg]

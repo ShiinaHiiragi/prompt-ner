@@ -11,5 +11,6 @@ __pycache__
 /test.ipynb
 /test.csv
 /test.tsv
+/record.md
 
 /utils/thulac/models
