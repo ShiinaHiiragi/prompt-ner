@@ -64,7 +64,6 @@ def validate(dataset, model, tokenizer):
             all_predict[0].append(1 if prob_vector[positive_token] > prob_vector[negative_token] else 0)
             all_ans[0].append(1 if Y[mask_index[0], mask_index[1]] == positive_token else 0)
 
-        LOG(all_predict, all_ans)
         return calc_acc(all_predict, all_ans), calc_f1(all_predict, all_ans)
 
 LOG(train_dataset.flag)
