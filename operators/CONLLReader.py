@@ -46,4 +46,5 @@ class CONLLReader:
                 inner_size = len(self.sentences[index])
                 for sub_index in range(inner_size):
                     f.write(f"{self.sentences[index][sub_index]}\t{self.labels[index][sub_index]}\n")
-                f.write("\n")
+                if index < outer_size - 1:
+                    f.write("\n")
