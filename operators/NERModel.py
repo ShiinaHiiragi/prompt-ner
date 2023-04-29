@@ -41,11 +41,6 @@ class NERModel(torch.nn.Module):
             crf_emissions = crf_emissions.to(DEVICE)
             crf_tags = crf_tags.to(DEVICE)
             crf_masks = crf_masks.to(DEVICE)
-
-            # from utils.constants import LOG
-            # LOG(crf_tags[0], crf_emissions.shape)
-            # LOG(crf_emissions, crf_tags, crf_masks)
-
             loss = self.crf(crf_emissions, crf_tags, mask=crf_masks) * (-1)
             return predict, crf_tags[crf_masks == 1], loss
 
