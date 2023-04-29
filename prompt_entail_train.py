@@ -3,19 +3,21 @@ from tqdm import tqdm
 from transformers import AutoTokenizer, BertForMaskedLM
 
 from utils.saver import tokenizer_loader, model_loader
-from utils.constants import MASK_TOKEN, LOG
+from utils.constants import MASK_TOKEN, LOG, DEVICE
 from utils.tester import find_token
 from utils.metrics import calc_acc, calc_f1
 from operators.PTEDataset import PTEDataset
 from PromptWeaver import EntailPromptOperator
 
-DATASET_NAME = "msra.entail"
+DATASET_NAME = "min.entail"
 LEARNING_RATE = 1e-5
 EPOCH = 1
 BATCH_SIZE = 4
 
 tokenizer = tokenizer_loader(AutoTokenizer, "bert-base-chinese")
 model = model_loader(BertForMaskedLM, "bert-base-chinese")
+model.to(DEVICE)
+
 train_dataset = PTEDataset(tokenizer=tokenizer, reader=f"./prompts/{DATASET_NAME}.train.tsv")
 dev_dataset = PTEDataset(tokenizer=tokenizer, reader=f"./prompts/{DATASET_NAME}.dev.tsv")
 dev_lite_dataset = PTEDataset(tokenizer=tokenizer, reader=f"./prompts/{DATASET_NAME}.lite.dev.tsv")
@@ -31,11 +33,15 @@ def train_loop(train_dataset, dev_dataset, dev_lite_dataset, model, tokenizer):
 def train(train_dataset, dev_dataset, model, tokenizer, optimizer):
     dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
     for batch_index, (batch_X, batch_Y) in enumerate(tqdm(dataloader)):
+        for key in batch_X.keys():
+            batch_X[key] = batch_X[key].to(DEVICE)
+        batch_Y = batch_Y.to(DEVICE)
+
         loss = model(**batch_X, labels=batch_Y).loss
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        if batch_index > 0 and batch_index % 100 == 0:
+        if batch_index > 0 and batch_index % 1 == 0:
             dev_acc = validate(dev_dataset, model, tokenizer)
             LOG(f"\nDEV ACC: {dev_acc}")
 
@@ -48,6 +54,9 @@ def validate(dataset, model, tokenizer):
     mask_index = (X["input_ids"] == MASK_TOKEN).nonzero()
 
     with torch.no_grad():
+        for key in X.keys():
+            X[key] = X[key].to(DEVICE)
+
         outputs = model(**X)[0]
         all_predict, all_ans = [[]], [[]]
         for index in tqdm(mask_index):
