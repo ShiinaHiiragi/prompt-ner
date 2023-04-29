@@ -13,7 +13,6 @@ LEARNING_RATE = 1e-5
 EPOCH = 1
 BATCH_SIZE = 4
 DATASET_NAME = "msra"
-MODEL_NAME = "baseline-msra"
 
 train_reader = CONLLReader(f"./data/{DATASET_NAME}.train")
 dev_reader = CONLLReader(f"./data/{DATASET_NAME}.lite.dev")
@@ -32,7 +31,7 @@ def train_loop(train_dataset, dev_dataset, model):
     optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
     for index in range(EPOCH):
         train(train_dataset, dev_dataset, model, optimizer)
-        model.save_pretrained(f"./pretrained/model/fine-tune/{MODEL_NAME}-epoch{index:02d}.pt")
+        model.save_pretrained(f"./pretrained/model/fine-tune/baseline-{DATASET_NAME}-epoch{index:02d}.pt")
 
 def train(train_dataset, dev_dataset, model, optimizer):
     dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
