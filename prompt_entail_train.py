@@ -10,8 +10,8 @@ from operators.PTEDataset import PTEDataset
 from PromptWeaver import EntailPromptOperator
 
 DATASET_NAME = "msra.entail"
-LEARNING_RATE = 1e-5
-EPOCH = 1
+LEARNING_RATE = 5e-5
+EPOCH = 2
 BATCH_SIZE = 4
 
 tokenizer = tokenizer_loader(AutoTokenizer, "bert-base-chinese")
@@ -59,10 +59,10 @@ def validate(dataset, model, tokenizer):
 
             mask_index = (X["input_ids"] == MASK_TOKEN).nonzero()[0]
             outputs = model(**X)[0]
-            prob_vector = outputs[mask_index[0], mask_index[1]]
+            prob_vector = torch.softmax(outputs[mask_index[0], mask_index[1]], 0)
 
             all_predict[0].append(1 if prob_vector[positive_token] > prob_vector[negative_token] else 0)
-            all_ans[0].append(1 if Y[mask_index[0], mask_index[1]] == positive_token else 0)
+            all_ans[0].append(1 if int(Y[mask_index[0], mask_index[1]]) == positive_token else 0)
 
         return calc_acc(all_predict, all_ans), calc_f1(all_predict, all_ans)
 
