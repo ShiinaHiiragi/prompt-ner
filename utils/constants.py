@@ -1,4 +1,5 @@
 import torch
+from pprint import pprint
 
 CLS_TOKEN = 101
 SEP_TOKEN = 102
@@ -10,6 +11,7 @@ SPECIAL_ID = -1
 
 GRAM = 4
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+LOG = lambda *msg: [pprint(f"\033[1;31m{it}\033[0m") for it in msg]
 
 NULL_LABEL = "O"
 LABEL_ENTITY = {
@@ -18,5 +20,3 @@ LABEL_ENTITY = {
     "PER": "人名",
     "GPE": "地缘政治实体名"
 }
-
-LOG = lambda *msg: [print(f"\033[1;31m{it}\033[0m") for it in msg]
