@@ -1,4 +1,5 @@
 import torch
+from utils.constants import NULL_LABEL
 
 def calc_acc(predict, ans):
     correct, total = 0, 0
@@ -31,11 +32,11 @@ def calc_f1_str(predict, ans):
         for sub_index in range(len(predict[index])):
             p = predict[index][sub_index]
             a = ans[index][sub_index]
-            if p != "O" and a != "O":
+            if p != NULL_LABEL and a != NULL_LABEL:
                 tp += 1
-            elif p == "O" and a != "O":
+            elif p == NULL_LABEL and a != NULL_LABEL:
                 fn += 1
-            elif p != "O" and a == "O":
+            elif p != NULL_LABEL and a == NULL_LABEL:
                 fp += 1
             else:
                 tn += 1
