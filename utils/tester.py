@@ -68,10 +68,10 @@ def predict_word_cut(model, tokenizer, sentence_str, word, flag_token):
     result = []
     with torch.no_grad():
         for key in positive_inputs.keys():
-            positive_inputs[key].to(DEVICE)
+            positive_inputs[key] = positive_inputs[key].to(DEVICE)
 
         for key in negative_input.keys():
-            negative_input[key].to(DEVICE)
+            negative_input[key] = negative_input[key].to(DEVICE)
 
         positive_outputs = model(**positive_inputs)[0]
         negative_output = model(**negative_input)[0]
@@ -104,7 +104,7 @@ def entail_test(model, tokenizer, reader):
     flag_token, _ = find_token(tokenizer)
 
     predicts = []
-    for sentence in reader.sentences:
+    for sentence in tqdm(reader.sentences):
         sentence_str = "".join(sentence)
         words = cut(sentence_str)
         predict = []

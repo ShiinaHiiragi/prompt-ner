@@ -9,7 +9,7 @@ from utils.metrics import calc_acc, calc_f1
 from operators.PTEDataset import PTEDataset
 from PromptWeaver import EntailPromptOperator
 
-DATASET_NAME = "msra.entail"
+DATASET_NAME = "msra"
 LEARNING_RATE = 5e-5
 EPOCH = 2
 BATCH_SIZE = 4
@@ -18,15 +18,15 @@ tokenizer = tokenizer_loader(AutoTokenizer, "bert-base-chinese")
 model = model_loader(BertForMaskedLM, "bert-base-chinese")
 model.to(DEVICE)
 
-train_dataset = PTEDataset(tokenizer=tokenizer, reader=f"./prompts/{DATASET_NAME}.train.tsv")
-dev_dataset = PTEDataset(tokenizer=tokenizer, reader=f"./prompts/{DATASET_NAME}.dev.tsv")
-dev_lite_dataset = PTEDataset(tokenizer=tokenizer, reader=f"./prompts/{DATASET_NAME}.lite.dev.tsv")
+train_dataset = PTEDataset(tokenizer=tokenizer, reader=f"./prompts/{DATASET_NAME}.entail.train.tsv")
+dev_dataset = PTEDataset(tokenizer=tokenizer, reader=f"./prompts/{DATASET_NAME}.entail.dev.tsv")
+dev_lite_dataset = PTEDataset(tokenizer=tokenizer, reader=f"./prompts/{DATASET_NAME}.entail.lite.dev.tsv")
 
 def train_loop(train_dataset, dev_dataset, dev_lite_dataset, model, tokenizer):
     optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
     for index in range(EPOCH):
         train(train_dataset, dev_lite_dataset, model, tokenizer, optimizer)
-        model.save_pretrained(f"./pretrained/model/fine-tune/prompt-{DATASET_NAME.replace('.', '-')}-epoch-{index:02d}")
+        model.save_pretrained(f"./pretrained/model/fine-tune/prompt-{DATASET_NAME}-entail-epoch-{index:02d}")
         dev_acc = validate(dev_dataset, model, tokenizer)
         LOG(f"\nEpoch {index:02d}: {dev_acc}")
 

@@ -24,3 +24,19 @@ def calc_f1(predict, ans):
             else:
                 tn += 1
     return (2 * tp) / (2 * tp + fp + fn)
+
+def calc_f1_str(predict, ans):
+    tp, tn, fp, fn = 0, 0, 0, 0
+    for index in range(len(predict)):
+        for sub_index in range(len(predict[index])):
+            p = predict[index][sub_index]
+            a = ans[index][sub_index]
+            if p != "O" and a != "O":
+                tp += 1
+            elif p == "O" and a != "O":
+                fn += 1
+            elif p != "O" and a == "O":
+                fp += 1
+            else:
+                tn += 1
+    return (2 * tp) / (2 * tp + fp + fn)
