@@ -14,6 +14,5 @@ test_reader = CONLLReader(filename=f"./data/{DATASET_NAME}.test")
 
 model.to(DEVICE)
 predict = entail_test(model, tokenizer, test_reader)
-print(predict, test_reader.labels)
 test_acc, test_f1 = calc_acc(predict, test_reader.labels), calc_f1_str(predict, test_reader.labels)
 LOG(f"TEST ACC: {(test_acc, test_f1)}")
