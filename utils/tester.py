@@ -80,7 +80,7 @@ def predict_word_cut(model, tokenizer, sentence_str, word, flag_token):
         negative_token = flag_token[EntailPromptOperator.NEGATIVE_FLAG]
 
         for batch, index in enumerate(positive_mask_index):
-            positive_prob_vector = positive_outputs[index[0]][index[1]]
+            positive_prob_vector = torch.softmax(positive_outputs[index[0], index[1]], 0)
             result.append((
                 label_entity_keys[batch],
                 calc_prob_score(
@@ -89,7 +89,7 @@ def predict_word_cut(model, tokenizer, sentence_str, word, flag_token):
                 )
             ))
 
-        negative_prob_vector = negative_output[negative_mask_index[0, 0]][negative_mask_index[0, 1]]
+        negative_prob_vector = torch.softmax(negative_output[negative_mask_index[0, 0], negative_mask_index[0, 1]], 0)
         result.append((
             NULL_LABEL,
             calc_prob_score(
