@@ -20,7 +20,8 @@ __pycache__
 
 # results of training and testing
 /record.md
-/.out
+/nohup.out
+/nohup.pid
 
 # avoid LFS
 /utils/thulac/models
