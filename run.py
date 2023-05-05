@@ -7,7 +7,7 @@ run_list = [
 ]
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]="5,4,3"
+os.environ["CUDA_VISIBLE_DEVICES"]="4,3"
 for filename in run_list:
     LOG(f"RUNNING {filename}")
     os.system(f"python {filename}")
