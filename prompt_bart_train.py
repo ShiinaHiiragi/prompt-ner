@@ -16,10 +16,11 @@ model = Seq2SeqModel(
     cuda_device=0,
     args={
         "num_train_epochs": 2,
-        "train_batch_size": 16,
+        "train_batch_size": 8,
         "evaluate_generated_text": True,
         "evaluate_during_training": True,
         "evaluate_during_training_verbose": True,
+        "use_multiprocessing": False,
         "overwrite_output_dir": True
     }
 )
