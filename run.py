@@ -6,7 +6,8 @@ run_list = [
     "./prompt_bart_train.py",
 ]
 
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:128"
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"]="5,4,3"
 for filename in run_list:
     LOG(f"RUNNING {filename}")
     os.system(f"python {filename}")
