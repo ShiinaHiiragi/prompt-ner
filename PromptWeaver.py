@@ -1,4 +1,7 @@
 import re
+import sys
+import argparse
+
 from random import random, randint
 from utils import han
 from utils.segment import cut
@@ -233,15 +236,30 @@ class EntailPromptOperator(PromptOperator):
 
         return result
 
+def dump(dataset_name, prompt_class, suffix):
+    LOG(f"WRITING prompts/{dataset_name}.{prompt_class}.{suffix}.tsv")
+    prompt_op = OperatorClass[prompt_class](f"./data/{dataset_name}.{suffix}")
+    prompt_op.dump(f"./prompts/{dataset_name}.{prompt_class}.{suffix}.tsv")
+
 if __name__ == "__main__":
     OperatorClass = {
         "bart": BartPromptOperator,
         "entail": EntailPromptOperator
     }
 
-    for dataset_name in ["min", "msra", "weibo"]:
-        for prompt_class in OperatorClass.keys():
-            for suffix in ["train", "dev", "lite.dev"]:
-                LOG(f"WRITING prompts/{dataset_name}.{prompt_class}.{suffix}.tsv")
-                prompt_op = OperatorClass[prompt_class](f"./data/{dataset_name}.{suffix}")
-                prompt_op.dump(f"./prompts/{dataset_name}.{prompt_class}.{suffix}.tsv")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str, default="min")
+    parser.add_argument('--pclass', type=str, default="bart")
+    parser.add_argument('--suffix', type=str, default="train")
+
+    if len(sys.argv) == 1:
+        for dataset_name in ["min", "msra", "weibo"]:
+            for prompt_class in OperatorClass.keys():
+                for suffix in ["train", "dev", "lite.dev"]:
+                    dump(dataset_name, prompt_class, suffix)
+    else:
+        args = parser.parse_args()
+        dataset_name = args.dataset
+        prompt_class = args.pclass
+        suffix = args.suffix
+        dump(dataset_name, prompt_class, suffix)
