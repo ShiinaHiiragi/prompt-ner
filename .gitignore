@@ -8,6 +8,8 @@ __pycache__
 
 # files created by simpletransformers
 /outputs
+/outputs-msra
+/outputs-weibo
 /runs
 /cache_dir
 
