@@ -8,12 +8,12 @@ from utils.tester import predict_labels
 from operators.CONLLReader import CONLLReader
 from operators.NERDataset import NERDataset
 
-DATASET_NAME = "min"
+DATASET_NAME = "msra"
 dataset = NERDataset(
     reader=CONLLReader(f"./data/{DATASET_NAME}.test"),
     tokenizer=tokenizer_loader(BertTokenizer, "fnlp/bart-base-chinese")
 )
-model = model_loader(BartForConditionalGeneration, "fnlp/bart-base-chinese")
+model = BartForConditionalGeneration.from_pretrained("./outputs/best_model")
 model.to(DEVICE)
 
 infer_labels = []

@@ -1,6 +1,8 @@
-# cache files
+# cache files generated automatically
 __pycache__
 /.vscode
+
+# files for backup models
 /pretrained
 /backup
 
@@ -18,6 +20,7 @@ __pycache__
 
 # results of training and testing
 /record.md
+/.out
 
 # avoid LFS
 /utils/thulac/models
