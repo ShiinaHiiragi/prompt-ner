@@ -1,6 +1,6 @@
 import torch
 from transformers import BertModel
-from TorchCRF import CRF
+from torchcrf import CRF
 
 from operators.NERDataset import crf_mask
 from utils.saver import model_loader
