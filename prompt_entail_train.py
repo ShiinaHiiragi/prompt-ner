@@ -43,7 +43,7 @@ def train(train_dataset, dev_dataset, model, tokenizer, optimizer):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        if batch_index >= 0 and batch_index % 1 == 0:
+        if batch_index % 100 == 0:
             dev_acc = validate(dev_dataset, model, tokenizer)
             tq.set_description(f"DEV ACC: ({dev_acc[0]:.2f}, {dev_acc[1]:.2f})")
 
