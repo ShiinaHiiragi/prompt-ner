@@ -30,5 +30,5 @@ def test_bart_base_chinese():
     generator = pipeline("text2text-generation", tokenizer=tokenizer, model=model)
     return generator("北京是[MASK]的首都")
 
-ans = test_bart_base_chinese()
+ans = test_bert_base_chinese()
 pprint(ans)

@@ -10,9 +10,10 @@ from operators.PTEDataset import PTEDataset
 from PromptWeaver import EntailPromptOperator
 
 DATASET_NAME = "msra"
-LEARNING_RATE = 5e-5
+LEARNING_RATE_FALL = 5e-5
+LEARNING_RATE = 1e-5
 EPOCH = 2
-BATCH_SIZE = 4
+BATCH_SIZE = 32
 
 tokenizer = tokenizer_loader(AutoTokenizer, "bert-base-chinese")
 model = model_loader(BertForMaskedLM, "bert-base-chinese")
@@ -23,8 +24,8 @@ dev_dataset = PTEDataset(tokenizer=tokenizer, reader=f"./prompts/{DATASET_NAME}.
 dev_lite_dataset = PTEDataset(tokenizer=tokenizer, reader=f"./prompts/{DATASET_NAME}.entail.lite.dev.tsv")
 
 def train_loop(train_dataset, dev_dataset, dev_lite_dataset, model, tokenizer):
-    optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
     for index in range(EPOCH):
+        optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE if index > 0 else LEARNING_RATE_FALL)
         train(train_dataset, dev_lite_dataset, model, tokenizer, optimizer)
         model.save_pretrained(f"./pretrained/model/fine-tune/prompt-{DATASET_NAME}-entail-epoch-{index:02d}")
         dev_acc = validate(dev_dataset, model, tokenizer)
@@ -41,9 +42,6 @@ def train(train_dataset, dev_dataset, model, tokenizer, optimizer):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        if batch_index > 0 and batch_index % 100 == 0:
-            dev_acc = validate(dev_dataset, model, tokenizer)
-            LOG(f"\nDEV ACC: {dev_acc}")
 
 def validate(dataset, model, tokenizer):
     positive_token = tokenizer.convert_tokens_to_ids(EntailPromptOperator.POSITIVE_FLAG)

@@ -121,11 +121,11 @@ class EntailPromptOperator(PromptOperator):
     # 非实体：非实体是实体的 POSITIVE_NEGATIVE_RATIO 倍，最低为 NEGATIVE_LOWER_BOND(ratio) 个
     # 　　　　该函数有 ratio 概率输出 1，有 1 - ratio 概率输出 0，默认为 DEFAULT_LOWER_BOND
     TRUE_POSITIVE_RATIO = 1
-    TRUE_NEGATIVE_RATIO = 0.25
-    FALSE_POSITIVE_RATIO = 0.25
-    FALSE_NEGATIVE_RATIO = 0.25
+    TRUE_NEGATIVE_RATIO = 0.75
+    FALSE_POSITIVE_RATIO = 0.75
+    FALSE_NEGATIVE_RATIO = 0.75
 
-    POSITIVE_NEGATIVE_RATIO = 0.5
+    POSITIVE_NEGATIVE_RATIO = 0.75
     DEFAULT_LOWER_BOND = 0.25
     NEGATIVE_LOWER_BOND = lambda self, ratio: 0 if random() > ratio else 1
 
