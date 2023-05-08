@@ -10,8 +10,8 @@ from operators.PTEDataset import PTEDataset
 from PromptWeaver import EntailPromptOperator
 
 DATASET_NAME = "msra"
-LEARNING_RATE_FALL = 5e-5
-LEARNING_RATE = 1e-5
+LEARNING_RATE_FALL = 5e-6
+LEARNING_RATE = 1e-6
 EPOCH = 2
 BATCH_SIZE = 32
 
@@ -29,11 +29,12 @@ def train_loop(train_dataset, dev_dataset, dev_lite_dataset, model, tokenizer):
         train(train_dataset, dev_lite_dataset, model, tokenizer, optimizer)
         model.save_pretrained(f"./pretrained/model/fine-tune/prompt-{DATASET_NAME}-entail-epoch-{index:02d}")
         dev_acc = validate(dev_dataset, model, tokenizer)
-        LOG(f"\nEpoch {index:02d}: {dev_acc}")
+        LOG(f"Epoch {index:02d}: {dev_acc}\n")
 
 def train(train_dataset, dev_dataset, model, tokenizer, optimizer):
     dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
-    for batch_index, (batch_X, batch_Y) in enumerate(tqdm(dataloader)):
+    tq = tqdm(dataloader)
+    for batch_index, (batch_X, batch_Y) in enumerate(tq):
         for key in batch_X.keys():
             batch_X[key] = batch_X[key].to(DEVICE)
         batch_Y = batch_Y.to(DEVICE)
@@ -42,6 +43,9 @@ def train(train_dataset, dev_dataset, model, tokenizer, optimizer):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        if batch_index >= 0 and batch_index % 1 == 0:
+            dev_acc = validate(dev_dataset, model, tokenizer)
+            tq.set_description(f"DEV ACC: ({dev_acc[0]:.2f}, {dev_acc[1]:.2f})")
 
 def validate(dataset, model, tokenizer):
     positive_token = tokenizer.convert_tokens_to_ids(EntailPromptOperator.POSITIVE_FLAG)
@@ -51,7 +55,7 @@ def validate(dataset, model, tokenizer):
         all_predict, all_ans = [[]], [[]]
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=1)
 
-        for index, (X, Y) in enumerate(tqdm(dataloader)):
+        for index, (X, Y) in enumerate(dataloader):
             for key in X.keys():
                 X[key] = X[key].to(DEVICE)
 
