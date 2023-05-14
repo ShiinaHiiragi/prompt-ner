@@ -207,3 +207,47 @@ def predict_labels(model, dataset, sentence_str):
 
     labels = mark_label(predict, len(sentence_str))
     return labels
+
+from utils.constants import LOG
+
+def predict_labels_ablation(model, dataset, sentence_str, tokenizer):
+    words = cut(sentence_str)
+    predict = []
+    part_labels_entity = calc_labels_entity(dataset)
+    for word in words:
+        judge = []
+        judge.append(BartPromptOperator.NEGATIVE_TEMPLATE.format(candidate_span=word))
+        for entity in part_labels_entity.keys():
+            judge.append(BartPromptOperator.POSITIVE_TEMPLATE.format(
+                candidate_span=word,
+                entity_type=part_labels_entity[entity]
+            ))
+
+        batch_size = len(judge)
+        inputs_id = tokenizer([sentence_str] * batch_size, return_tensors="pt")["input_ids"]
+        outputs = tokenizer(judge, return_tensors="pt", padding=True)
+        outputs_id = outputs["input_ids"]
+        outputs_id_length = torch.sum(outputs["attention_mask"], axis=1) - 2
+        max_outputs_id_length = int(max(outputs_id_length))
+        score = [1] * batch_size
+
+        with torch.no_grad():
+            logits = model(input_ids=inputs_id.to(DEVICE), decoder_input_ids=outputs_id.to(DEVICE))[0]
+            for token_index in range(max_outputs_id_length):
+                single_logits = logits[:, token_index, :].softmax(dim=1).to('cpu').numpy()
+                for sentence_index in range(batch_size):
+                    if token_index < outputs_id_length[sentence_index]:
+                        next_token_id = int(outputs_id[sentence_index, token_index + 1])
+                        score[sentence_index] *= single_logits[sentence_index][next_token_id]
+
+        max_score = max(score)
+        max_index = score.index(max_score)
+        lst = list(part_labels_entity.keys())
+        if max_index > 0:
+            new_type = [f"I-{lst[max_index - 1]}"] * len(word)
+            new_type[0] = f"B-{lst[max_index - 1]}"
+            predict += new_type
+        else:
+            predict += ["O"] * len(word)
+
+    return predict
